@@ -9,3 +9,4 @@ import {parseCapsLocks} from './parse'
 //parseGEIZHALS('https://geizhals.de/gigabyte-gaming-a18-3whk3dec64sh-a3685733.html').then(result=>{console.log(result)})
 //parsePCPARTKEEPER('https://pcpartkeeper.com/models/1433').then(result=>{console.log(result)})
 parseCapsLocks('https://capslocks.ru/klaviatury/tproduct/910381501242-klaviatura-wooting-60he-black').then(result=>{console.log(result)})
+parseCapsLocks('https://capslocks.ru/klaviatury/tproduct/228497586962-klaviatura-mad-60he-rgb-pro-chernaya').then(result=>{console.log(result)})

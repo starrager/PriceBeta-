@@ -9,8 +9,8 @@ app.use(cors({
     credentials:true
 }))
 
-import send from './routes/test.routes'
-app.use('/test',send)
+import searchRoutes from './routes/search.routes'
+app.use('/api',searchRoutes)
 
 app.listen(PORT,()=>{
     console.log(`THE SERVER IS RUNNING ON http://localhost:${PORT}`)

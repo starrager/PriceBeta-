@@ -3,129 +3,103 @@
     <div class="ambient ambient-top"></div>
     <div class="ambient ambient-center"></div>
     <div class="ambient ambient-bottom"></div>
-
     <header class="header">
-      <a href="" class="logo">
-        <span @click="router.push('/')" class="logo-mark">P</span>
-        <span @click="router.push('/')">PriceWatch</span>
+      <a href="#" class="logo" @click.prevent="router.push('/')">
+        <span class="logo-mark">P</span>
+        <span>PriceWatch</span>
       </a>
-
       <button class="login-button">Sign in</button>
     </header>
-
     <section class="hero">
       <div class="hero-content">
         <span class="eyebrow">Price comparison</span>
-
         <h1>
           Find the best price.<br />
           <span>Don't overpay.</span>
         </h1>
-
         <p class="hero-description">
-          Compare prices across popular stores,
-          track price history and know when it's
-          the right time to buy.
+          Compare prices across popular stores, track price history and know
+          when it's the right time to buy.
         </p>
-
         <div class="search-wrapper">
           <div class="search-box">
-            <svg
-              class="search-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-4-4" />
             </svg>
-
-            <input
-              type="text"
-              placeholder="What are you looking for?"
-              v-model="input"
-            />
-
-            <button @click="searchProduct" class="search-button">Search</button>
+            <input v-model="input" type="text" placeholder="What are you looking for?" @input="onSearchInput" @keyup.enter="searchProduct" />
+            <button class="search-button" :disabled="loading" @click="searchProduct">
+              {{ loading ? 'Searching...' : 'Search' }}
+            </button>
           </div>
-
-          <p class="search-hint">
-            Try: iPhone 17 Pro, Sony WH-1000XM6, RTX 5070
-          </p>
+          <p class="search-hint">Try: iPhone 17 Pro, Sony WH-1000XM6, RTX 5070</p>
+          <div v-if="results.length" class="search-results">
+            <div v-for="(item, index) in results" :key="item.id || index" class="search-result-item" @click="openProduct(item.pageurl || item.url)">
+              <div class="result-left">
+                <img v-if="item.product?.img" :src="item.product.img" alt="" class="result-image" @error="(e) => (e.target.style.display = 'none')" />
+                <div class="result-info">
+                  <span class="result-name" v-html="item.highlight || item.product?.title || item.title || item.name"></span>
+                  <span v-if="item.title" class="result-category">{{ item.title.replace(/^.*? - /, '') }}</span>
+                </div>
+              </div>
+              <div class="result-right">
+                <span v-if="item.product?.price" class="result-price">{{ Number(item.product.price).toLocaleString() }} ₽</span>
+                <span v-if="item.product?.priceold" class="result-old-price">{{ Number(item.product.priceold).toLocaleString() }} ₽</span>
+                <span v-else class="result-no-price">—</span>
+              </div>
+            </div>
+          </div>
+          <div v-if="searched && !results.length && !loading" class="no-results">No products found for "{{ input }}"</div>
         </div>
       </div>
     </section>
-
     <section class="popular">
       <div class="section-header">
         <div>
           <span class="section-label">Popular</span>
           <h2>Trending searches</h2>
         </div>
-
-        <button class="view-all">
-          View all
-          <span>→</span>
-        </button>
+        <button class="view-all">View all <span>→</span></button>
       </div>
-
       <div class="products">
         <article class="product-card">
-          <div class="product-image">
-            <span>iPhone</span>
-          </div>
-
+          <div class="product-image"><span>iPhone</span></div>
           <div class="product-info">
             <p class="product-category">Smartphone</p>
             <h3>iPhone 17 Pro</h3>
-
             <div class="product-bottom">
               <div>
                 <span class="price-label">from</span>
-                <strong>€1,049</strong>
+                <strong>1 049 ₽</strong>
               </div>
-
               <span class="shops">5 stores</span>
             </div>
           </div>
         </article>
-
         <article class="product-card">
-          <div class="product-image">
-            <span>AirPods</span>
-          </div>
-
+          <div class="product-image"><span>AirPods</span></div>
           <div class="product-info">
             <p class="product-category">Headphones</p>
             <h3>AirPods Pro 3</h3>
-
             <div class="product-bottom">
               <div>
                 <span class="price-label">from</span>
-                <strong>€199</strong>
+                <strong>199 ₽</strong>
               </div>
-
               <span class="shops">7 stores</span>
             </div>
           </div>
         </article>
-
         <article class="product-card">
-          <div class="product-image">
-            <span>RTX 5070</span>
-          </div>
-
+          <div class="product-image"><span>RTX 5070</span></div>
           <div class="product-info">
             <p class="product-category">Graphics Card</p>
             <h3>GeForce RTX 5070</h3>
-
             <div class="product-bottom">
               <div>
                 <span class="price-label">from</span>
-                <strong>€699</strong>
+                <strong>699 ₽</strong>
               </div>
-
               <span class="shops">6 stores</span>
             </div>
           </div>
@@ -136,231 +110,322 @@
 </template>
 
 <script setup>
-import {useRouter} from 'vue-router'
-import {ref} from 'vue'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 
-const input=ref('')
 const router=useRouter()
+const input=ref('')
+const results=ref([])
+const loading=ref(false)
+const searched=ref(false)
 
 const searchProduct=async()=>{
-    const res=await axios.get('http://localhost:5178/test')
-    console.log(res.data)
+    const query=input.value.trim()
+    if(!query||query.length<2){
+        results.value=[]
+        searched.value=false
+        return
+    }
+
+    loading.value=true
+    searched.value=true
+
+    try{
+        const response=await axios.get(`http://localhost:5178/api/search?q=${encodeURIComponent(query)}`)
+        results.value=response.data.pages || []
+    }catch(error){
+        console.error('Search error:', error)
+        results.value=[]
+    }finally{
+        loading.value=false
+    }
+}
+
+let searchTimeout=null
+const onSearchInput=()=>{
+    clearTimeout(searchTimeout)
+    searchTimeout=setTimeout(()=>{
+    if(input.value.trim().length>=2){
+        searchProduct()
+    }else{
+        results.value=[]
+        searched.value=false
+    }
+    },500)
+}
+
+const openProduct=(url)=>{
+    if(!url)return
+    const fullUrl=url.startsWith('http')?url:`https://capslocks.ru${url}`
+    window.open(fullUrl,'_blank')
 }
 </script>
 
 <style scoped>
 .home{
-  position:relative;
   min-height:100vh;
-  overflow:hidden;
+  overflow-x:hidden;
+  position:relative;
   background:#09090b;
-  color:#f4f4f5;
-}
-.ambient{
-  position:absolute;
-  pointer-events:none;
-  border-radius:50%;
-  filter:blur(100px);
-}
-.ambient-top{
-  top:-280px;
-  left:50%;
-  width:750px;
-  height:550px;
-  transform:translateX(-50%);
-  background:rgba(255,255,255,.055);
-}
-.ambient-center{
-  top:22%;
-  left:50%;
-  width:650px;
-  height:500px;
-  transform:translateX(-50%);
-  background:rgba(255,255,255,.035);
-}
-.ambient-bottom{
-  bottom:-400px;
-  left:50%;
-  width:900px;
-  height:500px;
-  transform:translateX(-50%);
-  background:rgba(255,255,255,.025);
 }
 .header{
-  position:relative;
-  z-index:2;
-  width:min(1180px,calc(100% - 48px));
-  height:72px;
+  width:min(1200px,calc(100% - 48px));
   margin:0 auto;
+  padding:28px 0;
   display:flex;
   align-items:center;
   justify-content:space-between;
+  position:relative;
+  z-index:10;
 }
 .logo{
   display:flex;
   align-items:center;
   gap:10px;
-  color:#fafafa;
+  color:#fff;
   text-decoration:none;
-  font-size:17px;
-  font-weight:600;
-  letter-spacing:-.02em;
+  font-size:20px;
+  font-weight:700;
 }
 .logo-mark{
-  width:32px;
-  height:32px;
-  display:grid;
-  place-items:center;
-  border:1px solid #3f3f46;
-  border-radius:9px;
-  background:#18181b;
+  width:34px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:10px;
+  background:#9e72ff;
   color:#fff;
-  font-size:14px;
-  font-weight:700;
-  box-shadow:0 0 25px rgba(255,255,255,.04);
+  font-weight:800;
 }
 .login-button{
-  padding:9px 16px;
-  border:1px solid #27272a;
-  border-radius:8px;
-  background:#18181b;
-  color:#d4d4d8;
-  font-size:14px;
+  padding:9px 18px;
+  border:1px solid #3f3f46;
+  border-radius:9px;
+  background:transparent;
+  color:#fff;
   cursor:pointer;
   transition:.2s;
 }
 .login-button:hover{
-  background:#27272a;
-  color:#fff;
+  background:#18181b;
 }
 .hero{
   position:relative;
-  z-index:1;
-  min-height:calc(100vh - 72px - 270px);
-  width:min(900px,calc(100% - 48px));
-  margin:0 auto;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
+  z-index:2;
+  padding:100px 24px 120px;
 }
 .hero-content{
-  width:100%;
+  width:min(900px,100%);
+  margin:0 auto;
   display:flex;
   flex-direction:column;
   align-items:center;
-  transform:translateY(-2vh);
+  text-align:center;
 }
-.eyebrow{
-  margin-bottom:16px;
-  color:#a1a1aa;
-  font-size:13px;
-  font-weight:500;
-  letter-spacing:.08em;
+.eyebrow,
+.section-label{
+  color:#9e72ff;
+  font-size:12px;
+  font-weight:600;
   text-transform:uppercase;
+  letter-spacing:.12em;
 }
-h1{
-  margin:0;
-  font-size:clamp(42px,6vw,68px);
+.hero h1{
+  margin:18px 0 20px;
+  color:#fff;
+  font-size:clamp(42px,6vw,72px);
   line-height:1.05;
-  letter-spacing:-.055em;
-  font-weight:650;
-  text-shadow:0 0 50px rgba(255,255,255,.04);
+  letter-spacing:-.04em;
 }
-h1 span{
-  color:#71717a;
+.hero h1 span{
+  color:#9e72ff;
 }
 .hero-description{
-  max-width:590px;
-  margin:20px auto 0;
+  max-width:600px;
+  margin:0;
   color:#a1a1aa;
-  font-size:16px;
-  line-height:1.55;
+  font-size:17px;
+  line-height:1.6;
 }
 .search-wrapper{
   width:min(700px,100%);
-  margin-top:30px;
+  margin-top:42px;
+  position:relative;
+  z-index:20;
 }
 .search-box{
+  height:62px;
   display:flex;
   align-items:center;
-  gap:12px;
-  padding:7px 7px 7px 18px;
-  border:1px solid #27272a;
-  border-radius:14px;
-  background:rgba(17,17,19,.88);
-  box-shadow:0 0 0 4px rgba(255,255,255,.015),0 0 70px rgba(255,255,255,.035),0 20px 50px rgba(0,0,0,.35);
-  backdrop-filter:blur(12px);
+  padding:6px 7px 6px 20px;
+  box-sizing:border-box;
+  border:1px solid #3f3f46;
+  border-radius:16px;
+  background:rgba(20,20,25,.95);
 }
 .search-icon{
-  width:20px;
-  height:20px;
+  width:21px;
+  height:21px;
   flex-shrink:0;
   color:#71717a;
 }
 .search-box input{
-  min-width:0;
   flex:1;
+  min-width:0;
+  height:100%;
+  padding:0 14px;
   border:0;
   outline:0;
   background:transparent;
-  color:#f4f4f5;
+  color:#fff;
   font-size:15px;
 }
 .search-box input::placeholder{
-  color:#52525b;
+  color:#71717a;
 }
 .search-button{
-  padding:12px 22px;
+  height:48px;
+  padding:0 20px;
+  flex-shrink:0;
   border:0;
-  border-radius:9px;
-  background:#f4f4f5;
-  color:#09090b;
-  font-size:14px;
+  border-radius:11px;
+  background:#9e72ff;
+  color:#fff;
   font-weight:600;
   cursor:pointer;
   transition:.2s;
-  box-shadow:0 0 25px rgba(255,255,255,.08);
 }
-.search-button:hover{
-  background:#fff;
-  box-shadow:0 0 35px rgba(255,255,255,.13);
+.search-button:hover:not(:disabled){
+  background:#8d5ff0;
+}
+.search-button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
 }
 .search-hint{
-  margin-top:9px;
+  margin:12px 0 0;
   color:#52525b;
   font-size:12px;
 }
+.search-results{
+  width:100%;
+  max-height:420px;
+  margin-top:10px;
+  padding:6px;
+  box-sizing:border-box;
+  overflow-y:auto;
+  border:1px solid #3f3f46;
+  border-radius:14px;
+  background:rgba(20,20,25,.98);
+  box-shadow:0 20px 50px rgba(0,0,0,.4);
+  text-align:left;
+}
+.search-result-item{
+  min-height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  transition:background .15s;
+}
+.search-result-item:hover{
+  background:rgba(255,255,255,.06);
+}
+.result-left{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.result-image{
+  width:46px;
+  height:46px;
+  flex-shrink:0;
+  object-fit:cover;
+  border-radius:8px;
+  background:#18181b;
+}
+.result-info{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.result-name{
+  overflow:hidden;
+  color:#f4f4f5;
+  font-size:14px;
+  font-weight:500;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.result-name :deep(b){
+  color:#9e72ff;
+}
+.result-category{
+  overflow:hidden;
+  color:#71717a;
+  font-size:12px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.result-right{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  flex-shrink:0;
+}
+.result-price{
+  color:#9e72ff;
+  font-size:15px;
+  font-weight:600;
+}
+.result-old-price{
+  color:#52525b;
+  font-size:12px;
+  text-decoration:line-through;
+}
+.result-no-price{
+  color:#52525b;
+}
+.no-results{
+  width:100%;
+  margin-top:10px;
+  padding:18px;
+  box-sizing:border-box;
+  border:1px solid #3f3f46;
+  border-radius:14px;
+  background:rgba(20,20,25,.95);
+  color:#71717a;
+  font-size:14px;
+}
 .popular{
+  width:min(1200px,calc(100% - 48px));
+  margin:0 auto;
+  padding-bottom:100px;
   position:relative;
   z-index:1;
-  width:min(1180px,calc(100% - 48px));
-  margin:0 auto;
-  padding:0 0 32px;
 }
 .section-header{
+  margin-bottom:28px;
   display:flex;
   align-items:flex-end;
   justify-content:space-between;
-  margin-bottom:14px;
-}
-.section-label{
-  color:#71717a;
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:.08em;
 }
 .section-header h2{
-  margin:5px 0 0;
-  font-size:22px;
-  letter-spacing:-.035em;
+  margin:8px 0 0;
+  color:#fff;
+  font-size:30px;
 }
 .view-all{
   border:0;
   background:transparent;
   color:#a1a1aa;
-  font-size:13px;
   cursor:pointer;
 }
 .view-all span{
@@ -369,90 +434,130 @@ h1 span{
 .products{
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  gap:14px;
+  gap:18px;
 }
 .product-card{
   overflow:hidden;
   border:1px solid #27272a;
-  border-radius:14px;
-  background:rgba(17,17,19,.8);
-  transition:.2s;
+  border-radius:16px;
+  background:rgba(20,20,25,.8);
+  transition:transform .2s,border-color .2s;
 }
 .product-card:hover{
   transform:translateY(-3px);
   border-color:#3f3f46;
 }
 .product-image{
-  height:135px;
-  display:grid;
-  place-items:center;
-  background:radial-gradient(circle,#27272a 0%,#18181b 45%,#111113 100%);
-  color:#52525b;
-  font-size:20px;
+  height:180px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#18181b;
+  color:#71717a;
+  font-size:18px;
   font-weight:600;
 }
 .product-info{
-  padding:14px 16px 16px;
+  padding:20px;
 }
 .product-category{
-  margin:0 0 5px;
-  color:#71717a;
-  font-size:11px;
-}
-.product-info h3{
-  margin:0;
-  font-size:16px;
-  font-weight:550;
-  letter-spacing:-.02em;
-}
-.product-bottom{
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  margin-top:14px;
-}
-.price-label{
-  margin-right:5px;
+  margin:0 0 7px;
   color:#71717a;
   font-size:12px;
 }
-.product-bottom strong{
-  font-size:16px;
-  letter-spacing:-.02em;
+.product-info h3{
+  margin:0;
+  color:#fff;
+  font-size:18px;
 }
-.shops{
-  color:#52525b;
+.product-bottom{
+  margin-top:25px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+}
+.price-label{
+  display:block;
+  margin-bottom:3px;
+  color:#71717a;
   font-size:11px;
 }
-@media(max-width:760px){
-  .header{
+.product-bottom strong{
+  color:#fff;
+  font-size:20px;
+}
+.shops{
+  color:#71717a;
+  font-size:12px;
+}
+.ambient{
+  position:absolute;
+  pointer-events:none;
+  border-radius:50%;
+  filter:blur(100px);
+  opacity:.15;
+}
+.ambient-top{
+  width:500px;
+  height:500px;
+  top:-250px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#9e72ff;
+}
+.ambient-center{
+  width:400px;
+  height:400px;
+  top:400px;
+  left:-200px;
+  background:#6d4aff;
+}
+.ambient-bottom{
+  width:400px;
+  height:400px;
+  right:-200px;
+  bottom:0;
+  background:#9e72ff;
+}
+.search-results::-webkit-scrollbar{
+  width:6px;
+}
+.search-results::-webkit-scrollbar-track{
+  background:transparent;
+}
+.search-results::-webkit-scrollbar-thumb{
+  border-radius:10px;
+  background:#3f3f46;
+}
+@media (max-width:768px){
+  .header,
+  .popular{
     width:calc(100% - 32px);
   }
   .hero{
-    width:calc(100% - 32px);
-    min-height:auto;
-    padding:70px 0 90px;
+    padding:70px 16px 90px;
   }
-  .hero-content{
-    transform:none;
-  }
-  .hero-description{
-    font-size:15px;
+  .hero h1{
+    font-size:42px;
   }
   .search-box{
+    height:58px;
     padding-left:14px;
   }
   .search-button{
-    padding:11px 15px;
-  }
-  .popular{
-    width:calc(100% - 32px);
+    padding:0 14px;
   }
   .products{
     grid-template-columns:1fr;
   }
-  .product-image{
-    height:150px;
+  .section-header{
+    align-items:flex-start;
+  }
+  .search-result-item{
+    gap:10px;
+  }
+  .result-name{
+    white-space:normal;
   }
 }
 </style>

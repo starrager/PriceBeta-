@@ -13,9 +13,9 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(Toast,{
-    position:'down-right',
+    position:'bottom-right',
     timeout:3000,
     closeOnClick:true,
-    pauseOnClick:true
+    pauseOnHover:true,
 })
 app.mount('#app')

@@ -21,10 +21,11 @@
             </p>
             </div>
 
-            <form class="auth-form">
+            <form class="auth-form" @submit.prevent="login">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input
+                v-model="email"
                 id="email"
                 type="text"
                 placeholder="you@example.com"
@@ -39,6 +40,7 @@
                 </div>
 
                 <input
+                v-model="password"
                 id="password"
                 type="password"
                 placeholder="Enter your password"
@@ -69,7 +71,31 @@
     </template>
 
 <script setup>
+import {ref} from 'vue'
+import { useToast } from 'vue-toastification'
+import axios from 'axios'
+import { useRouter } from 'vue-router';
 
+const router=useRouter()
+const toast=useToast()
+const email=ref('')
+const password=ref('')
+
+const login=async()=>{
+    try{
+        const response=await axios.post('http://localhost:5178/api/auth/login',{email:email.value,password:password.value})
+        toast.success('logged in')
+        email.value=''
+        password.value=''
+        router.push('/')
+    }catch(error){
+        console.error(error)
+        if(error.response){
+            const message=error.response.data?.error||'register error'
+            toast.error(message)
+        }else toast.error('no connect to server please repeat later')
+    }
+}
 </script>
 
 <style scoped>

@@ -21,7 +21,7 @@
             </p>
         </div>
 
-        <form class="auth-form">
+        <form class="auth-form" @submit.prevent="register">
           <div class="form-group">
             <label for="name">Name</label>
             <input
@@ -64,7 +64,7 @@
                 autocomplete="new-password"
             />
         </div>
-            <button type="submit" class="primary-button" @click="register">
+            <button type="submit" class="primary-button">
             Create account
             <span>→</span>
             </button>
@@ -89,22 +89,29 @@
 <script setup>
 import {ref} from 'vue'
 import axios from 'axios'
-import { createWatchCompilerHost } from 'typescript'
+import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification'
 
+const router=useRouter()
 const email=ref('')
 const name=ref('')
 const password=ref('')
+const toast=useToast()
 
 const register=async()=>{
     try{
         const response=await axios.post('http://localhost:5178/api/auth/register',{email:email.value,name:name.value,password:password.value})
-        console.log('success')
-        console.log(response.data)
+        toast.success('registered success')
         email.value=''
         name.value=''
         password.value=''
+        router.push('/')
     }catch(error){
-        console.error(error)
+        console.log(error)
+        if(error.response){
+            const message=error.response.data?.error||'register error'
+            toast.error(message)
+        }else toast.error('no connect to server please repeat later')
     }
 }
 

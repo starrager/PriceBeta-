@@ -1,5 +1,5 @@
 <template>
-  <main class="auth-page">
+    <main class="auth-page">
     <div class="ambient ambient-top"></div>
     <div class="ambient ambient-left"></div>
     <div class="ambient ambient-right"></div>
@@ -12,317 +12,339 @@
     </header>
 
     <section class="auth-section">
-      <div class="auth-content register-content">
-        <div class="auth-heading">
-          <span class="eyebrow">Get started</span>
-          <h1>Start saving with <span>PriceWatch.</span></h1>
-          <p>
-            Create an account and start tracking the prices that matter to you.
-          </p>
+        <div class="auth-content register-content">
+            <div class="auth-heading">
+                <span class="eyebrow">Get started</span>
+                <h1>Start saving with <span>PriceWatch.</span></h1>
+            <p>
+                Create an account and start tracking the prices that matter to you.
+            </p>
         </div>
 
         <form class="auth-form">
           <div class="form-group">
             <label for="name">Name</label>
             <input
-              id="name"
-              type="text"
-              placeholder="Your name"
-              autocomplete="name"
+                v-model="name"
+                id="name"
+                type="text"
+                placeholder="Your name"
+                autocomplete="name"
             />
           </div>
 
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              autocomplete="email"
-            />
-          </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                v-model="email"
+                id="email"
+                type="text"
+                placeholder="you@example.com"
+                autocomplete="email"
+                />
+            </div>
 
-          <div class="form-group">
+        <div class="form-group">
             <label for="password">Password</label>
             <input
-              id="password"
-              type="password"
-              placeholder="Create a password"
-              autocomplete="new-password"
+                v-model="password"
+                id="password"
+                type="password"
+                placeholder="Create a password"
+                autocomplete="new-password"
             />
-          </div>
+            </div>
 
-          <div class="form-group">
+        <div class="form-group">
             <label for="password-confirm">Confirm password</label>
             <input
-              id="password-confirm"
-              type="password"
-              placeholder="Repeat your password"
-              autocomplete="new-password"
+                id="password-confirm"
+                type="password"
+                placeholder="Repeat your password"
+                autocomplete="new-password"
             />
-          </div>
-
-          <button type="submit" class="primary-button">
+        </div>
+            <button type="submit" class="primary-button" @click="register">
             Create account
             <span>→</span>
-          </button>
+            </button>
         </form>
 
         <div class="auth-bottom">
-          <span>Already have an account?</span>
-          <a href="/login">Sign in</a>
+            <span>Already have an account?</span>
+            <a href="/login">Sign in</a>
         </div>
 
         <p class="terms">
-          By creating an account, you agree to our
-          <a href="#">Terms of Service</a>
-          and
-          <a href="#">Privacy Policy</a>.
+            By creating an account, you agree to our
+            <a href="#">Terms of Service</a>
+            and
+            <a href="#">Privacy Policy</a>.
         </p>
-      </div>
+        </div>
     </section>
-  </main>
+    </main>
 </template>
 
 <script setup>
+import {ref} from 'vue'
+import axios from 'axios'
+import { createWatchCompilerHost } from 'typescript'
+
+const email=ref('')
+const name=ref('')
+const password=ref('')
+
+const register=async()=>{
+    try{
+        const response=await axios.post('http://localhost:5178/api/auth/register',{email:email.value,name:name.value,password:password.value})
+        console.log('success')
+        console.log(response.data)
+        email.value=''
+        name.value=''
+        password.value=''
+    }catch(error){
+        console.error(error)
+    }
+}
 
 </script>
 
 <style scoped>
 .auth-page{
-  min-height:100vh;
-  position:relative;
-  overflow:hidden;
-  background:#09090b;
-  color:#fff;
-  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    min-height:100vh;
+    position:relative;
+    overflow:hidden;
+    background:#09090b;
+    color:#fff;
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 .header{
-  width:min(1200px,calc(100% - 48px));
-  margin:0 auto;
-  padding:28px 0;
-  position:relative;
-  z-index:10;
+    width:min(1200px,calc(100% - 48px));
+    margin:0 auto;
+    padding:28px 0;
+    position:relative;
+    z-index:10;
 }
 .logo{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  width:max-content;
-  color:#fff;
-  font-size:20px;
-  font-weight:700;
-  text-decoration:none;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:max-content;
+    color:#fff;
+    font-size:20px;
+    font-weight:700;
+    text-decoration:none;
 }
 .logo-mark{
-  width:34px;
-  height:34px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:10px;
-  background:#9e72ff;
-  color:#fff;
-  font-weight:800;
-  box-shadow:0 0 30px rgba(158,114,255,.2);
+    width:34px;
+    height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    background:#9e72ff;
+    color:#fff;
+    font-weight:800;
+    box-shadow:0 0 30px rgba(158,114,255,.2);
 }
 .auth-section{
-  min-height:calc(100vh - 90px);
-  position:relative;
-  z-index:2;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:40px 24px 90px;
-  box-sizing:border-box;
+    min-height:calc(100vh - 90px);
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px 24px 90px;
+    box-sizing:border-box;
 }
 .auth-content{
-  width:min(440px,100%);
-  margin-top:-35px;
-  text-align:center;
+    width:min(440px,100%);
+    margin-top:-35px;
+    text-align:center;
 }
 .register-content{
-  width:min(470px,100%);
+    width:min(470px,100%);
 }
 .auth-heading{
-  margin-bottom:32px;
+    margin-bottom:32px;
 }
 .eyebrow{
-  color:#9e72ff;
-  font-size:12px;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.12em;
+    color:#9e72ff;
+    font-size:12px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.12em;
 }
 .auth-heading h1{
-  margin:18px 0 17px;
-  color:#fff;
-  font-size:clamp(36px,5vw,50px);
-  line-height:1.05;
-  letter-spacing:-.045em;
+    margin:18px 0 17px;
+    color:#fff;
+    font-size:clamp(36px,5vw,50px);
+    line-height:1.05;
+    letter-spacing:-.045em;
 }
 .auth-heading h1 span{
-  color:#9e72ff;
+    color:#9e72ff;
 }
 .auth-heading p{
-  max-width:390px;
-  margin:0 auto;
-  color:#71717a;
-  font-size:14px;
-  line-height:1.7;
+    max-width:390px;
+    margin:0 auto;
+    color:#71717a;
+    font-size:14px;
+    line-height:1.7;
 }
 .auth-form{
-  display:flex;
-  flex-direction:column;
-  gap:17px;
-  padding:28px;
-  border:1px solid #27272a;
-  border-radius:16px;
-  background:rgba(20,20,25,.72);
-  box-shadow:0 25px 70px rgba(0,0,0,.25);
-  backdrop-filter:blur(12px);
-  text-align:left;
+    display:flex;
+    flex-direction:column;
+    gap:17px;
+    padding:28px;
+    border:1px solid #27272a;
+    border-radius:16px;
+    background:rgba(20,20,25,.72);
+    box-shadow:0 25px 70px rgba(0,0,0,.25);
+    backdrop-filter:blur(12px);
+    text-align:left;
 }
 .form-group{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
 }
 .form-group label{
-  color:#d4d4d8;
-  font-size:12px;
-  font-weight:600;
+    color:#d4d4d8;
+    font-size:12px;
+    font-weight:600;
 }
 .form-group input{
-  width:100%;
-  height:48px;
-  padding:0 15px;
-  box-sizing:border-box;
-  border:1px solid #3f3f46;
-  border-radius:10px;
-  outline:none;
-  background:#121216;
-  color:#fff;
-  font-family:inherit;
-  font-size:13px;
-  transition:.2s;
+    width:100%;
+    height:48px;
+    padding:0 15px;
+    box-sizing:border-box;
+    border:1px solid #3f3f46;
+    border-radius:10px;
+    outline:none;
+    background:#121216;
+    color:#fff;
+    font-family:inherit;
+    font-size:13px;
+    transition:.2s;
 }
 .form-group input::placeholder{
-  color:#52525b;
+    color:#52525b;
 }
 .form-group input:hover{
-  border-color:#52525b;
+    border-color:#52525b;
 }
 .form-group input:focus{
-  border-color:#9e72ff;
-  box-shadow:0 0 0 3px rgba(158,114,255,.1);
+    border-color:#9e72ff;
+    box-shadow:0 0 0 3px rgba(158,114,255,.1);
 }
 .primary-button{
-  height:49px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  margin-top:3px;
-  border:0;
-  border-radius:10px;
-  background:#9e72ff;
-  color:#fff;
-  font-family:inherit;
-  font-size:13px;
-  font-weight:600;
-  cursor:pointer;
-  transition:.2s;
+    height:49px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-top:3px;
+    border:0;
+    border-radius:10px;
+    background:#9e72ff;
+    color:#fff;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
 }
 .primary-button span{
-  font-size:16px;
-  transition:transform .2s;
+    font-size:16px;
+    transition:transform .2s;
 }
 .primary-button:hover{
-  background:#8d5ff0;
-  box-shadow:0 10px 30px rgba(158,114,255,.2);
-  transform:translateY(-1px);
+    background:#8d5ff0;
+    box-shadow:0 10px 30px rgba(158,114,255,.2);
+    transform:translateY(-1px);
 }
 .primary-button:hover span{
-  transform:translateX(3px);
+    transform:translateX(3px);
 }
 .auth-bottom{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:6px;
-  margin-top:22px;
-  color:#71717a;
-  font-size:12px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:6px;
+    margin-top:22px;
+    color:#71717a;
+    font-size:12px;
 }
 .auth-bottom a{
-  color:#9e72ff;
-  text-decoration:none;
-  font-weight:600;
+    color:#9e72ff;
+    text-decoration:none;
+    font-weight:600;
 }
 .auth-bottom a:hover{
-  color:#b696ff;
+    color:#b696ff;
 }
 .terms{
-  margin:18px auto 0;
-  max-width:350px;
-  color:#52525b;
-  font-size:10px;
-  line-height:1.7;
+    margin:18px auto 0;
+    max-width:350px;
+    color:#52525b;
+    font-size:10px;
+    line-height:1.7;
 }
 .terms a{
-  color:#71717a;
-  text-decoration:none;
+    color:#71717a;
+    text-decoration:none;
 }
 .terms a:hover{
-  color:#9e72ff;
+    color:#9e72ff;
 }
 .ambient{
-  position:absolute;
-  pointer-events:none;
-  border-radius:50%;
-  filter:blur(100px);
-  opacity:.15;
+    position:absolute;
+    pointer-events:none;
+    border-radius:50%;
+    filter:blur(100px);
+    opacity:.15;
 }
 .ambient-top{
-  width:500px;
-  height:500px;
-  top:-300px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#9e72ff;
+    width:500px;
+    height:500px;
+    top:-300px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#9e72ff;
 }
 .ambient-left{
-  width:400px;
-  height:400px;
-  left:-260px;
-  top:45%;
-  background:#6d4aff;
+    width:400px;
+    height:400px;
+    left:-260px;
+    top:45%;
+    background:#6d4aff;
 }
 .ambient-right{
-  width:400px;
-  height:400px;
-  right:-260px;
-  bottom:-150px;
-  background:#9e72ff;
+    width:400px;
+    height:400px;
+    right:-260px;
+    bottom:-150px;
+    background:#9e72ff;
 }
 @media(max-width:768px){
-  .header{
-    width:calc(100% - 32px);
-  }
-  .auth-section{
-    padding:40px 16px 70px;
-  }
-  .auth-content{
-    margin-top:-10px;
-  }
+    .header{
+        width:calc(100% - 32px);
+    }
+    .auth-section{
+        padding:40px 16px 70px;
+    }
+    .auth-content{
+        margin-top:-10px;
+    }
 }
 @media(max-width:500px){
-  .auth-heading h1{
-    font-size:36px;
-  }
-  .auth-form{
-    padding:20px;
-  }
+    .auth-heading h1{
+        font-size:36px;
+    }
+    .auth-form{
+        padding:20px;
+    }
 }
 </style>

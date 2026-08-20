@@ -10,7 +10,10 @@ app.use(cors({
 }))
 
 import searchRoutes from './routes/search.routes'
+import middleware from './routes/auth.routes'
+
 app.use('/api',searchRoutes)
+app.use('/api/auth',middleware)
 
 app.listen(PORT,()=>{
     console.log(`THE SERVER IS RUNNING ON http://localhost:${PORT}`)

@@ -97,7 +97,7 @@ const login=async()=>{
     }
 }
 </script>
-//test
+
 <style scoped>
 .auth-page{
     min-height:100vh;

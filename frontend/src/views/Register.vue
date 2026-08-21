@@ -105,6 +105,10 @@ const register=async()=>{
         email.value=''
         name.value=''
         password.value=''
+
+        localStorage.setItem('token',response.data.token)
+        localStorage.setItem('user',JSON.stringify(response.data.user))
+
         router.push('/')
     }catch(error){
         console.log(error)
@@ -114,7 +118,6 @@ const register=async()=>{
         }else toast.error('no connect to server please repeat later')
     }
 }
-
 </script>
 
 <style scoped>

@@ -87,6 +87,10 @@ const login=async()=>{
         toast.success('logged in')
         email.value=''
         password.value=''
+
+        localStorage.setItem('token',response.data.token)
+        localStorage.setItem('user',JSON.stringify(response.data.user))
+
         router.push('/')
     }catch(error){
         console.error(error)
